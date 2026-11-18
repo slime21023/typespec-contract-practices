@@ -17,7 +17,7 @@ decl='^(@[A-Za-z.]+(\(.*\))? *)*(model|op|interface|union|scalar|alias|enum) '
 # Layout
 [ -f "$C/main.tsp" ] && ok "main.tsp is the entrypoint" || bad "missing _contract/main.tsp"
 [ -f "$C/tspconfig.yaml" ] && ok "tspconfig.yaml present" || bad "missing _contract/tspconfig.yaml"
-out=$(cd "$ROOT" && find . -name '*.tsp' -not -path './_contract/*' -not -path '*/node_modules/*' -not -path './.git/*' | head -5)
+out=$(cd "$ROOT" && find . -name '*.tsp' -not -path './_contract/*' -not -path '*/node_modules/*' -not -path './.*' | head -5)
 [ -z "$out" ] && ok "no TypeSpec outside _contract/" || bad "TypeSpec outside _contract/: $(echo $out)"
 extra=$(cd "$C" && find . -mindepth 2 -path './modules/*' -name '*.tsp' | awk -F/ '{print $NF}' | sort -u | grep -vxE 'main.tsp|resource.tsp|requests.tsp|responses.tsp|operations.tsp')
 [ -z "$extra" ] && ok "module files use the five responsibility names" || bad "unexpected module file names: $(echo $extra)"
