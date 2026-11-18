@@ -1,67 +1,42 @@
-# Skill evals
+# Evaluation
 
-Repeatable use-case tests for the `typespec-contract-practices` skill. Each case is a small project seed plus the user request given to an agent. A run with the skill installed (`skill`) is compared with a run without it (`base`).
+One check answers the skill's question: **does the agent produce a TypeSpec contract that is standard, consistent and easy to maintain?** `check.sh` tests a contract against the organization rules in `SKILL.md` §2. It is a single script with no setup.
 
-This folder is not part of the installed skill; `bunx skills add` only copies `skills/typespec-contract-practices/`.
+## Run it
 
-## Cases
+```bash
+evals/check.sh path/to/_contract
+```
 
-| Case | Request | What it tests |
-| --- | --- | --- |
-| `uc1-bookstore` | Create a bookstore contract from scratch | Layout, money, constraints, pagination, auth, errors |
-| `uc2-patch` | Add a partial-update endpoint | Required / omittable / nullable and PATCH semantics |
-| `uc3-review` | Review a flawed contract without editing | Review-only behavior and finding quality |
-| `uc4-breaking` | Breaking changes to a published contract | Applying explicit requests and flagging compatibility |
-| `uc5-legacy` | Add an endpoint to TypeSpec that lives in `src/` | The `_contract/` rule for existing TypeSpec |
-| `uc6-multi-resource` | Create a two-resource contract; the prompt does not name `_contract/` | Choosing `_contract/` unprompted, module layout, namespaces, operation IDs |
+Exit code 0 means every check passed; 1 means at least one failed. The script reports `NOT RUN` for the compiler checks when no compiler is found (`tsp` on `PATH`, `$TSP`, or `node_modules/.bin/tsp` in a parent directory).
 
-## Requirements
+| Check | Rule |
+| --- | --- |
+| `main.tsp` and `tspconfig.yaml` exist; no `*.tsp` outside `_contract/` | Directory rule |
+| Module files are limited to `main`, `resource`, `requests`, `responses`, `operations`; each module has `main.tsp` and `operations.tsp` | Always split by responsibility |
+| `main.tsp` holds no models or operations; exactly one `@service`; no block namespaces | Entry point |
+| File namespace equals the service namespace (entry, `common/`) or `<Service>.<Capability>` (modules); imports come before `using` and `namespace` | Namespaces |
+| `requests` and `responses` do not import each other; no `@statusCode` or `@error` in `requests` | Dependencies |
+| Each file imports the libraries whose decorators it uses | Imports |
+| `tsp compile` passes | Compile |
+| No emitted operationId has an `Interface_` prefix | Explicit `@operationId` |
+| `tsp format --check` passes | Format gate |
 
-- bash with `find`, `sha256sum` and `cp` (Git Bash works on Windows)
-- Node.js and npm. The first `setup.sh` run installs the TypeSpec packages pinned in `setup.sh` into the work directory so runs are comparable; this needs network access once.
-- To test against your own toolchain instead, run with `SKIP_INSTALL=1` and make the compiler resolvable from the work directory (a `node_modules/` there, or a parent directory). Record the version you used in the results.
+The operationId check is for new contracts. An existing contract that already uses `<Interface>_<operation>` IDs is expected to fail it, because the skill keeps the existing style.
 
-## Running
+## Evaluate the skill
 
-1. Prepare the runs in a work directory outside the repository:
+1. In an empty project with the TypeSpec packages installed, give an agent with the skill this prompt, without naming `_contract/`:
 
-   ```bash
-   bash evals/scripts/setup.sh /tmp/skill-evals
-   # optional: CASES="uc1-bookstore uc5-legacy" VARIANTS="skill" RUNS=2
-   ```
+   > Design the TypeSpec API contract for a bookstore: books and authors. Books have an ISBN, title, author and price; authors have a name. Both can be listed and created; a book can also be fetched and updated. Use bearer authentication. Validate your work and report the results.
 
-2. For each file in `<work-dir>/prompts/`, start a fresh agent session and give it that prompt. Use one session per run and record the model.
-3. Grade the machine checks:
+2. Run `evals/check.sh _contract` on the result.
+3. Optionally run the same prompt without the skill and compare the two reports.
 
-   ```bash
-   bash evals/scripts/grade.sh /tmp/skill-evals
-   ```
+The three contracts in `skills/typespec-contract-practices/examples/` and the example in `references/contract-organization.md` are expected to pass. Run the script on them after changing the organization rules to confirm the examples and the checks still agree.
 
-4. Read each agent's final report, grade the report checks below, and record everything in `results/<date>.md`, including the model, the skill commit and the number of runs.
+## Limits
 
-`grade.sh` checks seed integrity before anything else and compiles a copy in `<work-dir>/.grade/`, so grading never changes a run.
-
-The `base` variant does not depend on the skill, so its earlier results can be reused. After changing the skill, rerun the `skill` variant.
-
-## Rubric
-
-| Case | Machine checks (`grade.sh`) | Report checks (manual) |
-| --- | --- | --- |
-| `uc1-bookstore` | TypeSpec only in `_contract/`; compiles; emits to `_contract/generated`; bearer security on every operation (top level or per operation); 404; page size max 100; 13-digit ISBN pattern; no binary float; currency property (the request names no single currency) | Assumptions are listed; each validation gate is PASS, FAIL or NOT RUN with a reason; failed compile attempts are counted |
-| `uc2-patch` | Only `_contract/main.tsp` changed; compiles; PATCH operation; `name` has `minLength: 1`; `description` is nullable | Omitted and `null` semantics are stated; the read model's representation of a cleared `description` is addressed |
-| `uc3-review` | Seed unchanged; no files created | Findings include the exposed `passwordHash`, missing authentication (401/403), client-settable `role`, unbounded pagination, and create returning 200 instead of 201 |
-| `uc4-breaking` | Only `_contract/main.tsp` changed (published baseline untouched); compiles; `awaiting` emitted, `pending` removed; `legacyCode` removed; `region` required | Each change is flagged as breaking with who it affects and a compatible alternative; no silent substitution |
-| `uc5-legacy` | Legacy files unchanged; change built in `_contract/`; compiles; history path emitted; `changedAt` is `date-time` | States which copy is authoritative; gives a migration plan (entrypoint, `tspconfig.yaml`, output directory) |
-| `uc6-multi-resource` | TypeSpec only in `_contract/`; compiles; bearer security on every operation; 404, 409 and 412 declared | Layout follows SKILL.md §2: entry `main.tsp` without models or operations, one module per resource split into `resource`, `requests`, `responses` and `operations`, module namespaces `<Service>.<Capability>`, explicit camelCase operation IDs, cross-module references fully qualified, no imports between `requests` and `responses` |
-
-Every case also checks, in the report, that no roles, permissions or scopes were invented, and that the format gate is reported as PASS or FAIL from `tsp format --check`, not as NOT RUN because "no formatter is configured".
-
-`uc1-bookstore` and `uc5-legacy` additionally check that the `.tsp` files the agent created pass `tsp format --check`; `uc2-patch` and `uc4-breaking` check that an existing one-line operation in the seed was not reformatted.
-
-The `base` variant is expected to fail some checks, for example `uc5-legacy` editing `src/`.
-
-## Limitations
-
-- Runs are few, so results show tendencies rather than statistics.
-- The rubric follows the skill's own rules; it measures conformance, not overall API quality.
-- The prompt names the skill path, so automatic skill loading is not tested.
+- The checks cover structure and tooling, not API design quality such as naming, PATCH semantics or authorization choices. Review those from the agent's report and the emitted OpenAPI.
+- Import completeness is checked only for the libraries, because the compiler does not check that a file imports the project files it uses.
+- One agent run is an anecdote, not a rate.

@@ -27,7 +27,7 @@ skills/typespec-contract-practices/
     versioning-and-validation.md    # compatibility review, validation gates, completion check
   examples/                         # compilable sample contracts (illustrative, not a mandated architecture)
     basic-crud/  rbac-api/  versioned-api/
-evals/                              # repeatable use-case tests for the skill (not installed)
+evals/                              # one structure check for contracts (not installed)
 ```
 
 ## Installation
@@ -46,4 +46,4 @@ The skill itself has no runtime dependencies. To compile the examples yourself y
 
 ## Evaluation
 
-`evals/` holds five use cases that compare agents with and without the skill, plus scripts to prepare and grade runs. See [evals/README.md](evals/README.md) for how to run them and [evals/results/](evals/results/) for recorded results.
+`evals/check.sh` checks a contract against the organization rules (layout, namespaces, dependencies, operation IDs, compile, format). See [evals/README.md](evals/README.md).
