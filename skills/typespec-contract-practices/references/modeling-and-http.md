@@ -47,9 +47,9 @@ model CreateUser {
 - Document retry/idempotency and concurrency preconditions for nontrivial mutations.
 - Document operations as contracts, not implementation instructions.
 
-## Verified syntax (TypeSpec 1.18)
+## Syntax examples
 
-This block compiles with `@typespec/compiler` 1.18.0 and the openapi3 emitter once `Book` and `BookPatch` are defined. Recheck against the installed version.
+Option syntax and available decorators differ between compiler releases. Check `tsp --version`, then compile a small sample with the project's installed compiler before relying on any of this. The block compiles once `Book` and `BookPatch` are defined.
 
 ```typespec
 import "@typespec/http";
@@ -58,7 +58,7 @@ using TypeSpec.Http;
 using TypeSpec.OpenAPI;
 
 @service(#{ title: "Bookstore API" }) // object values use #{ }
-@info(#{ version: "1.0.0" })          // version goes here, not in @service
+@info(#{ version: "1.0.0" })          // API version
 namespace Bookstore;
 
 @pattern("^[0-9]+\\.[0-9]{2}$")       // escape the backslash, or write [.]
@@ -76,5 +76,5 @@ op updateBook(
 ): Book;
 ```
 
-- `@service` rejects a `version` option (`invalid-argument`).
-- `description?: string | null` emits `nullable: true` in OpenAPI 3.0.
+- If `@service` rejects an option such as `version` (`invalid-argument`), set the API version with `@info` instead.
+- `description?: string | null` emits `nullable: true` when targeting OpenAPI 3.0.

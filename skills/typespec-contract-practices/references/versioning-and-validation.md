@@ -8,9 +8,9 @@
 - Removing authentication or weakening a tenant policy is a security regression even when the change is compatible. Obtain approval for intentional relaxation.
 - Use `@typespec/versioning` (`@versioned`, `@added`, and related decorators) for intentional evolution. The openapi3 emitter writes one file per version, such as `openapi.v1.yaml`. Inspect each one.
 - Put every `import` before `using` statements and declarations; otherwise the compiler reports `import-first`.
-- Compatible alternatives (verified on TypeSpec 1.18):
+- Compatible alternatives (confirm each by compiling with the installed compiler):
   - Rename an enum member but keep its wire value: `awaiting: "pending"`.
-  - Deprecate a property with the `#deprecated "reason"` directive, which emits `deprecated: true`. There is no `@deprecated` decorator.
+  - Deprecate a property with the `#deprecated "reason"` directive, which emits `deprecated: true`. Do not write `@deprecated`; it is not a decorator.
 
 ## Validation gates
 

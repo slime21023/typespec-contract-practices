@@ -14,7 +14,7 @@ TypeSpec is the source of truth; emitted OpenAPI is a generated artifact. Keep b
 1. Identify the project root; locate `_contract/`, package manager, lockfiles, `tspconfig.yaml`, `.tsp` entrypoints, scripts and CI.
 2. If TypeSpec exists outside `_contract/`, do not add to it, and do not move or delete it. Build the requested change in `_contract/`, copying the definitions it needs and leaving the originals untouched. State which copy is authoritative until the migration is done. Report the migration plan (what moves, entrypoint, `tspconfig.yaml`, output directory, import paths) for the user's decision. Report blocking conflicts; never move unrelated files or migrate destructively without a decision.
 3. Inspect a comparable operation/model, published OpenAPI, error shape, auth convention, versioning strategy and target OpenAPI version (3.0 or 3.1). Keep established conventions that do not conflict with the directory rule.
-4. Read `_contract/tspconfig.yaml`, scripts and installed versions before running any compiler command (MUST). Do not invent decorators, flags, policies or identifiers, and do not guess version-sensitive syntax.
+4. Read `_contract/tspconfig.yaml`, scripts and installed versions before running any compiler command (MUST). Do not invent decorators, flags, policies or identifiers, and do not guess version-sensitive syntax: compile a small sample with the installed compiler before relying on it.
 5. If `_contract/` is missing, create it with the entrypoint and config, using the repository's existing dependency management.
 
 **Blocking conditions.** Stop the affected changes when project root or contract ownership is ambiguous, authorization identifiers or policy semantics cannot be verified, a destructive migration needs an unresolved decision, or the request conflicts with established security or compatibility requirements. Continue independent work; report blockers and ask only for decisions needed to proceed.
@@ -105,6 +105,6 @@ Review-only requests: do not modify files (MUST NOT); give findings by severity 
 
 Read only the reference that matches the task; this file is authoritative. `examples/` holds illustrative patterns, not mandatory architecture.
 
-- Models, DTOs, PATCH, HTTP, errors, verified TypeSpec 1.18 syntax: `references/modeling-and-http.md`
+- Models, DTOs, PATCH, HTTP, errors, syntax examples: `references/modeling-and-http.md`
 - Authentication, permissions, policies, extensions: `references/authorization.md`
 - Published API changes, validation, completion check: `references/versioning-and-validation.md`
