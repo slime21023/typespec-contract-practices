@@ -21,11 +21,12 @@ Repository: [slime21023/typespec-contract-practices](https://github.com/slime210
 skills/typespec-contract-practices/
   SKILL.md                          # agent workflow and hard rules (authoritative)
   references/
-    modeling-and-http.md            # naming, models, PATCH, HTTP, errors, pagination
+    modeling-and-http.md            # naming, models, PATCH, HTTP, errors, verified TypeSpec 1.18 syntax
     authorization.md                # authentication, authorization, x-authorization extension
     versioning-and-validation.md    # compatibility review, validation gates, completion check
   examples/                         # compilable sample contracts (illustrative, not a mandated architecture)
     basic-crud/  rbac-api/  versioned-api/
+evals/                              # repeatable use-case tests for the skill (not installed)
 ```
 
 ## Installation
@@ -41,3 +42,7 @@ To install manually, copy `skills/typespec-contract-practices/` into your agent'
 ## Compiling the examples (optional)
 
 The skill itself has no runtime dependencies. To compile the examples yourself you need Node.js and compatible versions of `@typespec/compiler`, `@typespec/http`, `@typespec/openapi` and `@typespec/openapi3` (plus `@typespec/versioning` for `versioned-api`). Then run `tsp compile .` from the example's `_contract/` directory.
+
+## Evaluation
+
+`evals/` holds five use cases that compare agents with and without the skill, plus scripts to prepare and grade runs. See [evals/README.md](evals/README.md) for how to run them and [evals/results/](evals/results/) for recorded results.
