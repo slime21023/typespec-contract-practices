@@ -12,7 +12,7 @@ TypeSpec is the source of truth; emitted OpenAPI is a generated artifact. Keep b
 ## 1. Activation
 
 1. Identify the project root; locate `_contract/`, package manager, lockfiles, `tspconfig.yaml`, `.tsp` entrypoints, scripts and CI.
-2. If TypeSpec exists outside `_contract/`, do not add to it, and do not move or delete it. Build the requested change in `_contract/`, copying the definitions it needs and leaving the originals untouched. Report the migration plan (what moves, entrypoint, `tspconfig.yaml`, output directory, import paths) for the user's decision. Report blocking conflicts; never move unrelated files or migrate destructively without a decision.
+2. If TypeSpec exists outside `_contract/`, do not add to it, and do not move or delete it. Build the requested change in `_contract/`, copying the definitions it needs and leaving the originals untouched. State which copy is authoritative until the migration is done. Report the migration plan (what moves, entrypoint, `tspconfig.yaml`, output directory, import paths) for the user's decision. Report blocking conflicts; never move unrelated files or migrate destructively without a decision.
 3. Inspect a comparable operation/model, published OpenAPI, error shape, auth convention, versioning strategy and target OpenAPI version (3.0 or 3.1). Keep established conventions that do not conflict with the directory rule.
 4. Read `_contract/tspconfig.yaml`, scripts and installed versions before running any compiler command (MUST). Do not invent decorators, flags, policies or identifiers, and do not guess version-sensitive syntax.
 5. If `_contract/` is missing, create it with the entrypoint and config, using the repository's existing dependency management.
@@ -56,7 +56,7 @@ Details: `references/authorization.md`.
 
 Keep these separate: **authentication** (caller identity; security schemes, `@useAuth`), **scopes** (token capabilities), **roles** (group memberships, mapped to permissions by IAM), **permissions** (business operations such as `users:delete`), **resource policies** (tenant, ownership, state).
 
-- Mark each operation authenticated or intentionally public per project convention; default to deny when uncertain.
+- Mark each operation authenticated or intentionally public per project convention; default to deny when uncertain. If the project has no auth convention at all, do not invent a scheme: flag each new operation as unauthenticated and ask.
 - Define permissions/policies for sensitive endpoints; never infer them from the HTTP verb. Prefer permissions over enumerating roles.
 - `@roles`, `@permissions` and `@requirePermissions` are not built in; use them only if the project implements them.
 - Never invent roles, permissions, scopes or policy IDs. Verify identifiers against the project's registry and block affected changes if they cannot be verified (MUST).
@@ -103,8 +103,8 @@ Review-only requests: do not modify files (MUST NOT); give findings by severity 
 
 ## References
 
-Read only what the task needs; this file is authoritative. `examples/` holds illustrative patterns, not mandatory architecture.
+Read only the reference that matches the task; this file is authoritative. `examples/` holds illustrative patterns, not mandatory architecture.
 
-- Models, DTOs, PATCH, HTTP, errors: `references/modeling-and-http.md`
+- Models, DTOs, PATCH, HTTP, errors, verified TypeSpec 1.18 syntax: `references/modeling-and-http.md`
 - Authentication, permissions, policies, extensions: `references/authorization.md`
 - Published API changes, validation, completion check: `references/versioning-and-validation.md`

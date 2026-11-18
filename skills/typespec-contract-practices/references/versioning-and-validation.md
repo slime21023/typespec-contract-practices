@@ -8,6 +8,9 @@
 - Removing authentication or weakening a tenant policy is a security regression even when the change is compatible. Obtain approval for intentional relaxation.
 - Use `@typespec/versioning` (`@versioned`, `@added`, and related decorators) for intentional evolution. The openapi3 emitter writes one file per version, such as `openapi.v1.yaml`. Inspect each one.
 - Put every `import` before `using` statements and declarations; otherwise the compiler reports `import-first`.
+- Compatible alternatives (verified on TypeSpec 1.18):
+  - Rename an enum member but keep its wire value: `awaiting: "pending"`.
+  - Deprecate a property with the `#deprecated "reason"` directive, which emits `deprecated: true`. There is no `@deprecated` decorator.
 
 ## Validation gates
 
@@ -21,6 +24,8 @@ Run in this order, skipping gates that do not apply:
 4. OpenAPI validation (only if tools exist)
 5. Breaking-change comparison (only if a baseline exists)
 6. Contract, integration and security tests (if runnable)
+
+Format the files you create. If a file you edit was already unformatted before your change, report the format gate as FAIL with that reason instead of reformatting untouched code in the same change.
 
 Report each gate as PASS, FAIL or NOT RUN, with the command and, for NOT RUN, the reason. Inspect emitted paths, schemas, status codes, security and extensions.
 
