@@ -78,7 +78,7 @@ Details: `references/versioning-and-validation.md`.
 
 - Generate OpenAPI from `_contract/`; hand-patching generated output is never the lasting source of truth (MUST NOT).
 - Check the impacted emitted paths/methods, parameters, requestBody, responses, operationId, schemas, security and extensions.
-- Run available gates in this order, adapting to repository scripts: format check, compile, configured lint, OpenAPI validation, baseline comparison, contract/integration/security tests.
+- Run available gates in this order, adapting to repository scripts: format check (`tsp format --check` ships with the compiler, so run it even when the project configures no formatter), compile, configured lint, OpenAPI validation, baseline comparison, contract/integration/security tests.
 - Report any gate that was not executed as `NOT RUN` with the reason, and never as `PASS` (MUST). Without validation tooling the contract is not verified.
 - Do not add CLI tools, GitHub Actions or custom emitters without user need and compatibility review.
 

@@ -18,7 +18,7 @@ Inspect package versions and repository scripts before running commands; do not 
 
 Run in this order, skipping gates that do not apply:
 
-1. Format check
+1. Format check: `tsp format --check` on the files you created or changed. It ships with the compiler, so it applies even when no formatter is configured.
 2. Compile
 3. Lint (only if configured)
 4. OpenAPI validation (only if tools exist)
