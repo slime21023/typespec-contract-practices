@@ -13,6 +13,7 @@ This folder is not part of the installed skill; `bunx skills add` only copies `s
 | `uc3-review` | Review a flawed contract without editing | Review-only behavior and finding quality |
 | `uc4-breaking` | Breaking changes to a published contract | Applying explicit requests and flagging compatibility |
 | `uc5-legacy` | Add an endpoint to TypeSpec that lives in `src/` | The `_contract/` rule for existing TypeSpec |
+| `uc6-multi-resource` | Create a two-resource contract; the prompt does not name `_contract/` | Choosing `_contract/` unprompted, module layout, namespaces, operation IDs |
 
 ## Requirements
 
@@ -51,6 +52,7 @@ The `base` variant does not depend on the skill, so its earlier results can be r
 | `uc3-review` | Seed unchanged; no files created | Findings include the exposed `passwordHash`, missing authentication (401/403), client-settable `role`, unbounded pagination, and create returning 200 instead of 201 |
 | `uc4-breaking` | Only `_contract/main.tsp` changed (published baseline untouched); compiles; `awaiting` emitted, `pending` removed; `legacyCode` removed; `region` required | Each change is flagged as breaking with who it affects and a compatible alternative; no silent substitution |
 | `uc5-legacy` | Legacy files unchanged; change built in `_contract/`; compiles; history path emitted; `changedAt` is `date-time` | States which copy is authoritative; gives a migration plan (entrypoint, `tspconfig.yaml`, output directory) |
+| `uc6-multi-resource` | TypeSpec only in `_contract/`; compiles; bearer security on every operation; 404, 409 and 412 declared | Layout follows SKILL.md §2: entry `main.tsp` without models or operations, one module per resource split into `resource`, `requests`, `responses` and `operations`, module namespaces `<Service>.<Capability>`, explicit camelCase operation IDs, cross-module references fully qualified, no imports between `requests` and `responses` |
 
 Every case also checks, in the report, that no roles, permissions or scopes were invented, and that the format gate is reported as PASS or FAIL from `tsp format --check`, not as NOT RUN because "no formatter is configured".
 

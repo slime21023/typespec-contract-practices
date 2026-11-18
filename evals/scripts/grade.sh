@@ -118,6 +118,12 @@ for run in $runs; do
       ck "changedAt is date-time" 'has "$oa" "^ +changedAt:" && has "$oa" "format: date-time"'
       ck "new .tsp files formatted" 'fmt_new_ok'
       ;;
+    uc6)
+      ck "TypeSpec only in _contract" '[ -z "$outside" ] && [ -f "$dir/_contract/main.tsp" ]'
+      ck "compiles" '[ "$ce" = 0 ]'
+      ck "bearer security on every operation" 'has "$oa" "scheme: [Bb]earer" && all_ops_secured "$oa"'
+      ck "404, 409 and 412 declared" 'has "$oa" "^ +.404.:" && has "$oa" "^ +.409.:" && has "$oa" "^ +.412.:"'
+      ;;
     *) failed=" unknown case;" ;;
   esac
 
