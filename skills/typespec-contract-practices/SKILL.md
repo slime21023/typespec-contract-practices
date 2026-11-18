@@ -12,7 +12,7 @@ TypeSpec is the source of truth; emitted OpenAPI is a generated artifact. Keep b
 ## 1. Activation
 
 1. Identify the project root; locate `_contract/`, package manager, lockfiles, `tspconfig.yaml`, `.tsp` entrypoints, scripts and CI.
-2. If TypeSpec exists outside `_contract/`, do not add to it. Plan a migration into `_contract/` that preserves import paths, compiler settings and generated behavior. Report blocking conflicts; never move unrelated files or migrate destructively without a decision.
+2. If TypeSpec exists outside `_contract/`, do not add to it, and do not move or delete it. Build the requested change in `_contract/`, copying the definitions it needs and leaving the originals untouched. Report the migration plan (what moves, entrypoint, `tspconfig.yaml`, output directory, import paths) for the user's decision. Report blocking conflicts; never move unrelated files or migrate destructively without a decision.
 3. Inspect a comparable operation/model, published OpenAPI, error shape, auth convention, versioning strategy and target OpenAPI version (3.0 or 3.1). Keep established conventions that do not conflict with the directory rule.
 4. Read `_contract/tspconfig.yaml`, scripts and installed versions before running any compiler command (MUST). Do not invent decorators, flags, policies or identifiers, and do not guess version-sensitive syntax.
 5. If `_contract/` is missing, create it with the entrypoint and config, using the repository's existing dependency management.
@@ -70,6 +70,7 @@ Details: `references/versioning-and-validation.md`.
 - Compare with the published baseline when available, not only the source.
 - Flag changes to routes, methods, operation IDs, required inputs, response fields/types, enum wire values, status codes, scopes, permissions, roles and resource policies.
 - Prefer additive changes and `@typespec/versioning` for intentional evolution; breaking changes need a version, deprecation and migration strategy. New enum members and added response properties are not unconditionally non-breaking.
+- When the user explicitly asks for a breaking change, make the change as requested; never silently substitute a compatible design. For each breaking item, report who it breaks and offer a compatible, versioned or deprecation alternative. Ask first only when the request is ambiguous or relaxes security.
 - Preserve the target OpenAPI version and downstream gateway/SDK/validator compatibility.
 - Assess security regressions independently of compatibility: authentication removed, permission/role/scope relaxed, resource policy weakened, data newly exposed. Intentional relaxation needs explicit approval (MUST). Tightening authorization can itself be breaking.
 
