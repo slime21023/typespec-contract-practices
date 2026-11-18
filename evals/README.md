@@ -17,7 +17,8 @@ This folder is not part of the installed skill; `bunx skills add` only copies `s
 ## Requirements
 
 - bash with `find`, `sha256sum` and `cp` (Git Bash works on Windows)
-- Node.js and npm. The first `setup.sh` run installs the pinned TypeSpec packages into the work directory; this needs network access once.
+- Node.js and npm. The first `setup.sh` run installs the TypeSpec packages pinned in `setup.sh` into the work directory so runs are comparable; this needs network access once.
+- To test against your own toolchain instead, run with `SKIP_INSTALL=1` and make the compiler resolvable from the work directory (a `node_modules/` there, or a parent directory). Record the version you used in the results.
 
 ## Running
 
