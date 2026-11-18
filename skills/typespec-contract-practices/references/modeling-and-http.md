@@ -7,6 +7,8 @@ Defaults; preserve an established project convention.
 | Element | Convention | Example |
 | --- | --- | --- |
 | Namespace, model, interface, enum, union, custom scalar | PascalCase | `User`, `UserStatus`, `UserId` |
+| Module namespace | `<Service>.<Capability>`, capability from the module directory | `Bookstore.OrderItems` for `modules/order-items/` |
+| Interface | PascalCase plural resource, no `I` prefix | `Books` |
 | Property, parameter, operation, enum member, custom decorator | camelCase | `displayName`, `listUsers` |
 | Built-in scalar | original name | `utcDateTime` |
 | Source file | kebab-case | `user-operations.tsp` |
@@ -68,12 +70,17 @@ model CreateBook {
   ...OmitProperties<Book, "isbn">;
 }
 
-@patch @route("/books/{isbn}")
-op updateBook(
-  @path isbn: string,
-  @header contentType: "application/merge-patch+json",
-  @body patch: BookPatch,
-): Book;
+@route("/books")
+interface Books {
+  @operationId("updateBook")
+  @patch
+  @route("/{isbn}")
+  updateBook(
+    @path isbn: string,
+    @header contentType: "application/merge-patch+json",
+    @body patch: BookPatch,
+  ): Book;
+}
 ```
 
 - If `@service` rejects an option such as `version` (`invalid-argument`), set the API version with `@info` instead.

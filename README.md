@@ -21,6 +21,7 @@ Repository: [slime21023/typespec-contract-practices](https://github.com/slime210
 skills/typespec-contract-practices/
   SKILL.md                          # agent workflow and hard rules (authoritative)
   references/
+    contract-organization.md        # file layout, namespaces, operation IDs, with a complete example
     modeling-and-http.md            # naming, models, PATCH, HTTP, errors, syntax examples
     authorization.md                # authentication, authorization, x-authorization extension
     versioning-and-validation.md    # compatibility review, validation gates, completion check

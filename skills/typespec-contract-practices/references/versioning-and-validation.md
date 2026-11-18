@@ -8,6 +8,8 @@
 - Removing authentication or weakening a tenant policy is a security regression even when the change is compatible. Obtain approval for intentional relaxation.
 - Use `@typespec/versioning` (`@versioned`, `@added`, and related decorators) for intentional evolution. The openapi3 emitter writes one file per version, such as `openapi.v1.yaml`. Inspect each one.
 - Put every `import` before `using` statements and declarations; otherwise the compiler reports `import-first`.
+- Moving a published model to another namespace renames its emitted schema (`Book` becomes `Books.Book`). The wire format is unchanged, but generated SDK types are renamed, so treat it as breaking.
+- Splitting or merging files without changing namespaces leaves the emitted OpenAPI unchanged.
 - Compatible alternatives (confirm each by compiling with the installed compiler):
   - Rename an enum member but keep its wire value: `awaiting: "pending"`.
   - Deprecate a property with the `#deprecated "reason"` directive, which emits `deprecated: true`. Do not write `@deprecated`; it is not a decorator.

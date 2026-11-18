@@ -12,30 +12,38 @@ TypeSpec is the source of truth; emitted OpenAPI is a generated artifact. Keep b
 ## 1. Activation
 
 1. Identify the project root; locate `_contract/`, package manager, lockfiles, `tspconfig.yaml`, `.tsp` entrypoints, scripts and CI.
-2. If TypeSpec exists outside `_contract/`, do not add to it, and do not move or delete it. Build the requested change in `_contract/`, copying the definitions it needs and leaving the originals untouched. State which copy is authoritative until the migration is done. Report the migration plan (what moves, entrypoint, `tspconfig.yaml`, output directory, import paths) for the user's decision. Report blocking conflicts; never move unrelated files or migrate destructively without a decision.
+2. If TypeSpec exists outside `_contract/`, do not add to it, and do not move or delete it. Build the requested change in `_contract/`, copying the definitions it needs and leaving the originals untouched; arrange the copy as in §2 but keep its namespaces and operation IDs. State which copy is authoritative until the migration is done. Report the migration plan (what moves, entrypoint, `tspconfig.yaml`, output directory, import paths) for the user's decision. Report blocking conflicts; never move unrelated files or migrate destructively without a decision.
 3. Inspect a comparable operation/model, published OpenAPI, error shape, auth convention, versioning strategy and target OpenAPI version (3.0 or 3.1). Keep established conventions that do not conflict with the directory rule.
 4. Read `_contract/tspconfig.yaml`, scripts and installed versions before running any compiler command (MUST). Do not invent decorators, flags, policies or identifiers, and do not guess version-sensitive syntax: compile a small sample with the installed compiler before relying on it.
 5. If `_contract/` is missing, create it with the entrypoint and config, using the repository's existing dependency management.
 
 **Blocking conditions.** Stop the affected changes when project root or contract ownership is ambiguous, authorization identifiers or policy semantics cannot be verified, a destructive migration needs an unresolved decision, or the request conflicts with established security or compatibility requirements. Continue independent work; report blockers and ask only for decisions needed to proceed.
 
-## 2. Layout
+## 2. Contract organization
+
+Rationale and complete examples: `references/contract-organization.md`.
 
 ```text
-<project-root>/
-  _contract/
-    main.tsp            # entrypoint
-    tspconfig.yaml
-    common/             # errors, pagination, shared types
-    security/           # authentication, authorization
-    modules/<capability>/models.tsp, operations.tsp
-    generated/          # compiler output only
+_contract/
+  main.tsp              # only entrypoint
+  tspconfig.yaml
+  common/errors.tsp     # shared error shape; common/ holds only what 2+ modules use
+  modules/<capability>/
+    main.tsp            # imports the module's files
+    resource.tsp        # resource model
+    requests.tsp        # client input: bodies, parameters
+    responses.tsp       # server output: status codes, pages, module errors
+    operations.tsp      # one interface
+  generated/            # compiler output
 ```
 
-- Keep a discoverable entrypoint and resolvable imports inside `_contract/`.
-- Organize by business capability, not HTTP verb or controller. Centralize only genuinely shared primitives; avoid giant base models.
-- Small projects may use a few files directly under `_contract/`; the tree is not mandatory.
-- Do not restructure unrelated application code or introduce a framework. Never create or edit files in `generated/` by hand.
+- **Entry:** `_contract/main.tsp` holds only library imports, `@service`, `@info`, `@useAuth`, `@versioned` with its `Versions` enum, the service namespace, and `import "./modules/<capability>";` (a directory import loads that directory's `main.tsp`).
+- **Modules:** one per business capability, not per HTTP verb or controller, always split by responsibility as above, even for one resource. Skip a file whose responsibility is empty; never add a file or directory for one trivial definition.
+- **Namespaces:** one file-level `namespace X;` per file, after the imports; no block namespaces; one `@service`. `main.tsp` and `common/` use the PascalCase service namespace (`Bookstore`). Module files use `<Service>.<Capability>` from the directory name (`order-items` → `Bookstore.OrderItems`). Module code uses parent-namespace definitions directly and other modules by fully qualified name (`Bookstore.Authors.Author`).
+- **Operations:** one `interface <Resources>` per module, with `@route` on the interface; camelCase verb plus resource names (`listBooks`). New contracts give every operation `@operationId` with the same name; without it the emitted ID is `<Interface>_<operation>`. In an existing contract, including a copy of out-of-tree TypeSpec, new operations follow its existing ID style; never mix the two.
+- **Dependencies:** `resource` ← `requests`, `responses` ← `operations`; `requests` and `responses` never import each other. Every file imports each library and file it uses; the compiler checks neither. Derive request models from the resource (`OmitProperties`, visibility) instead of copying fields.
+- **Existing projects:** keep their layout, namespaces and operation IDs; add new work where their structure puts it. Moving a published model to another namespace renames its emitted schema.
+- Do not restructure unrelated application code. Never create or edit files in `generated/` by hand.
 
 ## 3. Contract conventions
 
@@ -79,6 +87,7 @@ Details: `references/versioning-and-validation.md`.
 - Generate OpenAPI from `_contract/`; hand-patching generated output is never the lasting source of truth (MUST NOT).
 - Check the impacted emitted paths/methods, parameters, requestBody, responses, operationId, schemas, security and extensions.
 - Run available gates in this order, adapting to repository scripts: format check (`tsp format --check` ships with the compiler, so run it even when the project configures no formatter), compile, configured lint, OpenAPI validation, baseline comparison, contract/integration/security tests.
+- Format the files you create. If a file you edit was already unformatted, report the format gate as FAIL and do not reformat untouched code.
 - Report any gate that was not executed as `NOT RUN` with the reason, and never as `PASS` (MUST). Without validation tooling the contract is not verified.
 - Do not add CLI tools, GitHub Actions or custom emitters without user need and compatibility review.
 
@@ -105,6 +114,7 @@ Review-only requests: do not modify files (MUST NOT); give findings by severity 
 
 Read only the reference that matches the task; this file is authoritative. `examples/` holds illustrative patterns, not mandatory architecture.
 
+- Creating or reorganizing contract files, namespaces, operation IDs: `references/contract-organization.md`
 - Models, DTOs, PATCH, HTTP, errors, syntax examples: `references/modeling-and-http.md`
 - Authentication, permissions, policies, extensions: `references/authorization.md`
 - Published API changes, validation, completion check: `references/versioning-and-validation.md`
