@@ -1,0 +1,32 @@
+# Versioning and validation details
+
+## Compatibility review
+
+- Compare with the published baseline; preserve the target OpenAPI version and operation IDs.
+- Check required fields, enum values, response types, routes, status codes and authorization.
+- Added enum members break exhaustive clients; added response properties can break strict consumers.
+- Removing authentication or weakening a tenant policy is a security regression even when the change is compatible. Obtain approval for intentional relaxation.
+- Use `@typespec/versioning` (`@versioned`, `@added`, and related decorators) for intentional evolution. The openapi3 emitter writes one file per version, such as `openapi.v1.yaml`. Inspect each one.
+- Put every `import` before `using` statements and declarations; otherwise the compiler reports `import-first`.
+
+## Validation gates
+
+Inspect package versions and repository scripts before running commands; do not invent CLI options. A typical compile is `tsp compile .` from `_contract/`, after checking the installed CLI version.
+
+Run in this order, skipping gates that do not apply:
+
+1. Format check
+2. Compile
+3. Lint (only if configured)
+4. OpenAPI validation (only if tools exist)
+5. Breaking-change comparison (only if a baseline exists)
+6. Contract, integration and security tests (if runnable)
+
+Report each gate as PASS, FAIL or NOT RUN, with the command and, for NOT RUN, the reason. Inspect emitted paths, schemas, status codes, security and extensions.
+
+## Completion check
+
+- All project-owned TypeSpec and TypeSpec config are under `_contract/`; no hand-edited generated output.
+- Emitted OpenAPI matches the intended contract and target version.
+- Security regressions are assessed; blockers are resolved or reported.
+- The report lists modified files, behavior changes, validation results and remaining risks.
