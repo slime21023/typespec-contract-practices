@@ -52,7 +52,9 @@ The `base` variant does not depend on the skill, so its earlier results can be r
 | `uc4-breaking` | Only `_contract/main.tsp` changed (published baseline untouched); compiles; `awaiting` emitted, `pending` removed; `legacyCode` removed; `region` required | Each change is flagged as breaking with who it affects and a compatible alternative; no silent substitution |
 | `uc5-legacy` | Legacy files unchanged; change built in `_contract/`; compiles; history path emitted; `changedAt` is `date-time` | States which copy is authoritative; gives a migration plan (entrypoint, `tspconfig.yaml`, output directory) |
 
-Every case also checks, in the report, that no roles, permissions or scopes were invented.
+Every case also checks, in the report, that no roles, permissions or scopes were invented, and that the format gate is reported as PASS or FAIL from `tsp format --check`, not as NOT RUN because "no formatter is configured".
+
+`uc1-bookstore` and `uc5-legacy` additionally check that the `.tsp` files the agent created pass `tsp format --check`; `uc2-patch` and `uc4-breaking` check that an existing one-line operation in the seed was not reformatted.
 
 The `base` variant is expected to fail some checks, for example `uc5-legacy` editing `src/`.
 

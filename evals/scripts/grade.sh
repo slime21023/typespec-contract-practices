@@ -30,6 +30,15 @@ emitted() { [ -n "${1:-}" ] && find "$1" -name 'openapi*.yaml' 2>/dev/null | sor
 schema()  { [ -n "${1:-}" ] && [ -f "$1" ] && awk -v n="    $2:" '$0==n{s=1;print;next} s&&/^    [^ ]/{exit} s{print}' "$1"; }
 required_of() { schema "$1" "$2" | awk '/^      required:/{r=1;next} r&&/^        - /{print $2;next} r{exit}'; }
 only_changed() { [ -z "$(printf '%s\n' $changed | grep -vxF "$1")" ]; }
+# Existing code must keep its original formatting: a seed line must survive verbatim.
+keeps_line() { [ -f "$dir/_contract/main.tsp" ] && grep -qF -- "$1" "$dir/_contract/main.tsp"; }
+# Files the agent created must pass the compiler's own format check.
+fmt_new_ok() {
+  local files
+  files="$(printf '%s\n' $new | grep -E '\.tsp$' | grep -vE '(^|/)(generated|tsp-output)/')"
+  [ -z "$files" ] && return 0
+  (cd "$t" && npx --no-install tsp format --check $files > "$t/.format.log" 2>&1)
+}
 
 echo "| run | seed files changed | new files (outside .claude) | .tsp outside _contract | compile | checks | failed checks |"
 echo "| --- | --- | --- | --- | --- | --- | --- |"
@@ -78,6 +87,7 @@ for run in $runs; do
       ck "isbn 13-digit pattern" 'has "$oa" "pattern: .*[{]13[}]"'
       ck "no binary float" '! has "$oa" "type: number"'
       ck "currency property" 'has "$oa" "^ +currency:"'
+      ck "new .tsp files formatted" 'fmt_new_ok'
       ;;
     uc2)
       ck "only _contract/main.tsp changed" 'only_changed _contract/main.tsp'
@@ -85,6 +95,7 @@ for run in $runs; do
       ck "patch operation" 'has "$oa" "^    patch:"'
       ck "name minLength 1" 'has "$oa" "minLength: 1"'
       ck "description nullable" 'has "$oa" "nullable: true"'
+      ck "existing code not reformatted" 'keeps_line "@post createProduct(@body input: Product): { @statusCode statusCode: 201; @body product: Product; };"'
       ;;
     uc3)
       ck "seed files unchanged" '[ -z "$changed" ]'
@@ -97,6 +108,7 @@ for run in $runs; do
       ck "pending removed (as requested)" '! has "$oa" "^ +- pending$"'
       ck "legacyCode removed" '! has "$oa" "^ +legacyCode:"'
       ck "region required" 'required_of "$oa" CreateOrder | grep -qx region'
+      ck "existing code not reformatted" 'keeps_line "@post createOrder(@body input: CreateOrder): { @statusCode statusCode: 201; @body order: Order; };"'
       ;;
     uc5)
       ck "legacy files unchanged" '[ -z "$changed" ]'
@@ -104,6 +116,7 @@ for run in $runs; do
       ck "compiles" '[ "$ce" = 0 ]'
       ck "history path emitted" 'has "$oa" "/orders/[{]orderId[}]/history"'
       ck "changedAt is date-time" 'has "$oa" "^ +changedAt:" && has "$oa" "format: date-time"'
+      ck "new .tsp files formatted" 'fmt_new_ok'
       ;;
     *) failed=" unknown case;" ;;
   esac
