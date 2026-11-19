@@ -12,6 +12,8 @@ bunx skills add slime21023/typespec-contract-practices
 
 For manual installation, copy `skills/typespec-contract-practices/` into your agent's skills directory. Start a new session and ask the agent to apply `typespec-contract-practices` to your contract task.
 
+The `skills` CLI installs the agent instructions. Install TypeSpec and, if you lint generated OpenAPI, `@stoplight/spectral-cli` in the project that owns the contract.
+
 [SKILL.md](skills/typespec-contract-practices/SKILL.md) defines the project-root `_contract/` layout, HTTP and PATCH semantics, authorization requirements, and comparison against a published OpenAPI baseline when available. The [TypeSpec references](skills/typespec-contract-practices/references/) illustrate contract organization, HTTP modeling, authorization metadata, and versioning.
 
 ## Validation
